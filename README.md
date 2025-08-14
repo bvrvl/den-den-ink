@@ -1,6 +1,21 @@
 # Den Den Ink 🐌
 
-Den Den Ink is a fast, simple, and thematic command-line tool for taking notes, inspired by the loyal communication snails of *One Piece*. It's built in C++ for performance and uses SQLite for robust, local storage.
+Den Den Ink is a fast, simple, and thematic command-line tool for taking notes, inspired by the loyal communication snails 🐌 of *One Piece* 🐌 . 
+<div align="center">
+🐌🐌🐌
+</div>
+<br>
+<div align="center">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Release](https://img.shields.io/github/v/release/bvrvl/den-den-ink)](https://github.com/bvrvl/den-den-ink/releases)
+[![Made with C++](https://img.shields.io/badge/Made%20with-C%2B%2B-00599C.svg)](https://isocpp.org/)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)
+
+</div>
+<div align="center">
+🐌🐌🐌
+</div>
 
 ## Features
 
@@ -9,7 +24,7 @@ Den Den Ink is a fast, simple, and thematic command-line tool for taking notes, 
 -   **Powerful Search**: Quickly find notes by text and tags.
 -   **Quick Listing**: List recent notes or filter by a specific tag.
 -   **Insightful Stats**: Get an overview of your note-taking habits, including top tags and project activity.
--   **Thematic Flair**: Fun, snail-themed confirmations and icons.
+-   **Thematic Flair**: Fun, 🐌 snail-themed 🐌 confirmations and icons.
 
 ## Installation
 
@@ -84,3 +99,6 @@ ink list #shopping
 ink stats
 ```
 
+<div align="center">
+🐌🐌🐌
+</div>
