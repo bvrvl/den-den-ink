@@ -98,6 +98,11 @@ ink list #shopping
 ```bash
 ink stats
 ```
+## Contributing
+Found a bug or have a feature request? We'd love your help! Please open an issue or submit a pull request on our [GitHub Repository](https://github.com/bvrvl/den-den-ink)
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 <div align="center">
 🐌🐌🐌
