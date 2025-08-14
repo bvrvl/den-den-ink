@@ -31,7 +31,7 @@ sudo apt-get update
 sudo apt-get install libsqlite3-dev build-essential
 ```
 
-###Build from Source
+### Build from Source
 1. Clone the repository
 ```bash
 git clone https://github.com/bvrvl/den-den-ink.git
@@ -58,6 +58,7 @@ ink #shopping "Buy milk and eggs"
 ink "Remember to call #mom"
 ```
 2. Add a Programming Note
+
 *(The p command must immediately follow ink)*
 ```bash
 ink p "Refactored the database module" #cpp #refactor
