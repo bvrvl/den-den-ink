@@ -1,10 +1,11 @@
-// main.cpp
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cstdlib>     
-#include <sqlite3.h>    
-#include "database.hpp" 
+#include <cstdlib>
+#include <sstream>
+#include <algorithm>
+#include <sqlite3.h>
+#include "database.hpp"
 
 void show_usage() {
     std::cout << "Welcome to Den Den Ink! 🐌" << std::endl;
@@ -17,6 +18,45 @@ void show_usage() {
     std::cout << "  ink stats" << std::endl;
 }
 
+void parse_note_input(const std::vector<std::string>& args, int start_index, std::string& text, std::vector<std::string>& tags) {
+    std::stringstream text_builder;
+    
+    for (size_t i = start_index; i < args.size(); ++i) {
+        if (!args[i].empty() && args[i][0] == '#') {
+            tags.push_back(args[i]);
+        } else {
+            text_builder << args[i] << " ";
+        }
+    }
+
+    std::string full_text = text_builder.str();
+
+    // Trim trailing space
+    if (!full_text.empty()) {
+        full_text.pop_back();
+    }
+    
+    // Handle quoted text by removing the quotes if they exist
+    if (full_text.size() > 1 && full_text.front() == '"' && full_text.back() == '"') {
+        text = full_text.substr(1, full_text.length() - 2);
+    } else {
+        text = full_text;
+    }
+
+    // Second pass: find tags that might have been inside the quotes
+    std::stringstream ss(text);
+    std::string word;
+    while (ss >> word) {
+        if (!word.empty() && word[0] == '#') {
+            // Avoid adding duplicate tags
+            if (std::find(tags.begin(), tags.end(), word) == tags.end()) {
+                tags.push_back(word);
+            }
+        }
+    }
+}
+
+
 int main(int argc, char* argv[]) {
     // --- Database Initialization ---
     const char* home_dir = getenv("HOME");
@@ -25,11 +65,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     std::string db_path = std::string(home_dir) + "/.den_den_ink.db";
-    
     sqlite3* db_connection = db::init_database(db_path);
 
     if (!db_connection) {
-        std::cerr << "Failed to initialize the database. Exiting." << std::endl;
         return 1;
     }
 
@@ -41,16 +79,34 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // --- Command Dispatching ---
     std::string command = args[1];
 
-    std::cout << "Den Den Ink is processing your request..." << std::endl;
-    std::cout << "Detected command/start of input: \"" << command << "\"" << std::endl;
+    // Check for specific commands first
+    if (command == "p" || command == "search" || command == "list" || command == "stats") {
+        // We will implement these later
+        std::cout << "Command '" << command << "' is not yet implemented." << std::endl;
+    } else {
+        // DEFAULT ACTION: If it's not a known command, treat it as a general note.
+        std::string note_text;
+        std::vector<std::string> tags;
+        
+        // The note starts from the first argument (index 1)
+        parse_note_input(args, 1, note_text, tags);
 
-    // Command dispatching will go here.
+        if (note_text.empty()) {
+            std::cerr << "Error: Note text cannot be empty." << std::endl;
+            show_usage();
+        } else {
+            if (db::add_note(db_connection, note_text, "general", tags)) {
+                std::cout << "\n🐌 Ink captured!" << std::endl;
+            } else {
+                std::cerr << "Error: Failed to save your note." << std::endl;
+            }
+        }
+    }
 
     // --- Cleanup ---
     sqlite3_close(db_connection);
-    std::cout << "Database connection closed." << std::endl;
-
     return 0;
 }
