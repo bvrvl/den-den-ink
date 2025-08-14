@@ -7,7 +7,8 @@
 #include <sqlite3.h>
 #include "database.hpp"
 #include "metadata_collector.hpp"
-#include "note_formatter.hpp" 
+#include "note_formatter.hpp"
+#include "stats_engine.hpp" 
 
 void show_usage() {
     std::cout << "Welcome to Den Den Ink! 🐌" << std::endl;
@@ -23,7 +24,6 @@ void show_usage() {
 void parse_note_input(const std::vector<std::string>& args, int start_index, std::string& text, std::vector<std::string>& tags) {
     std::stringstream text_builder;
     std::string combined_text;
-
     for (size_t i = start_index; i < args.size(); ++i) {
         if (!args[i].empty() && args[i][0] == '#') {
             if (std::find(tags.begin(), tags.end(), args[i]) == tags.end()) {
@@ -33,18 +33,13 @@ void parse_note_input(const std::vector<std::string>& args, int start_index, std
             text_builder << args[i] << " ";
         }
     }
-    
     combined_text = text_builder.str();
-    if (!combined_text.empty()) {
-        combined_text.pop_back(); // Remove trailing space
-    }
-    
+    if (!combined_text.empty()) { combined_text.pop_back(); }
     if (combined_text.length() >= 2 && combined_text.front() == '"' && combined_text.back() == '"') {
         text = combined_text.substr(1, combined_text.length() - 2);
     } else {
         text = combined_text;
     }
-
     std::stringstream ss(text);
     std::string word;
     while (ss >> word) {
@@ -83,25 +78,18 @@ int main(int argc, char* argv[]) {
             std::string note_text;
             std::vector<std::string> tags;
             parse_note_input(args, 2, note_text, tags);
-            if (note_text.empty()) {
-                std::cerr << "Error: Note text cannot be empty." << std::endl;
-                show_usage();
+            ProgMetadata metadata = metadata::collect_metadata();
+            if (db::add_prog_note(db_connection, note_text, tags, metadata)) {
+                std::cout << "\n🐌 Ink captured!" << std::endl;
             } else {
-                ProgMetadata metadata = metadata::collect_metadata();
-                if (db::add_prog_note(db_connection, note_text, tags, metadata)) {
-                    std::cout << "\n🐌 Ink captured!" << std::endl;
-                } else {
-                    std::cerr << "Error: Failed to save your programming note." << std::endl;
-                }
+                std::cerr << "Error: Failed to save your programming note." << std::endl;
             }
         }
     } else if (command == "list") {
-        if (args.size() == 2) { // `ink list`
-            std::vector<FullNote> notes = db::list_recent_notes(db_connection, 10);
-            formatter::print_notes(notes);
-        } else if (args.size() == 3 && args[2][0] == '#') { // `ink list #tag`
-            std::vector<FullNote> notes = db::list_notes_by_tag(db_connection, args[2]);
-            formatter::print_notes(notes);
+        if (args.size() == 2) {
+            formatter::print_notes(db::list_recent_notes(db_connection, 10));
+        } else if (args.size() == 3 && args[2][0] == '#') {
+            formatter::print_notes(db::list_notes_by_tag(db_connection, args[2]));
         } else {
             show_usage();
         }
@@ -113,11 +101,11 @@ int main(int argc, char* argv[]) {
             std::string query;
             std::vector<std::string> tags;
             parse_note_input(args, 2, query, tags);
-            std::vector<FullNote> notes = db::search_notes(db_connection, query, tags);
-            formatter::print_notes(notes);
+            formatter::print_notes(db::search_notes(db_connection, query, tags));
         }
     } else if (command == "stats") {
-        std::cout << "Command 'stats' is not yet implemented. 📊" << std::endl;
+        AppStats app_stats = stats::gather_stats(db_connection);
+        stats::print_stats(app_stats);
     } else {
         // Default action: General note
         std::string note_text;

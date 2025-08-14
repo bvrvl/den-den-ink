@@ -3,18 +3,17 @@
 
 #include <string>
 #include <vector>
+#include <utility> 
 #include <sqlite3.h>
 #include "metadata_collector.hpp"
 
-// This struct represents a complete note retrieved from the database,
-// including its main data, tags, and any associated programming metadata.
 struct FullNote {
     long long id;
     std::string text;
     std::string type;
     std::string timestamp;
     std::vector<std::string> tags;
-    ProgMetadata metadata; // Will be empty for general notes
+    ProgMetadata metadata;
 };
 
 namespace db {
@@ -29,6 +28,12 @@ namespace db {
     std::vector<FullNote> list_recent_notes(sqlite3* db, int limit);
     std::vector<FullNote> list_notes_by_tag(sqlite3* db, const std::string& tag);
     std::vector<FullNote> search_notes(sqlite3* db, const std::string& query, const std::vector<std::string>& tags);
+
+    // Functions for statistics
+    int get_total_notes_count(sqlite3* db);
+    std::vector<std::pair<std::string, int>> get_tag_counts(sqlite3* db);
+    std::vector<std::pair<std::string, int>> get_project_counts(sqlite3* db);
+    std::vector<std::pair<std::string, int>> get_daily_counts(sqlite3* db);
 }
 
 #endif
