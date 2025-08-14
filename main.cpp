@@ -58,7 +58,6 @@ void parse_note_input(const std::vector<std::string>& args, int start_index, std
 
 
 int main(int argc, char* argv[]) {
-    // --- Database Initialization ---
     const char* home_dir = getenv("HOME");
     if (home_dir == nullptr) {
         std::cerr << "Error: Could not find HOME environment variable." << std::endl;
@@ -67,38 +66,51 @@ int main(int argc, char* argv[]) {
     std::string db_path = std::string(home_dir) + "/.den_den_ink.db";
     sqlite3* db_connection = db::init_database(db_path);
 
-    if (!db_connection) {
-        return 1;
-    }
+    if (!db_connection) return 1;
 
     std::vector<std::string> args(argv, argv + argc);
-
     if (args.size() < 2) {
         show_usage();
         sqlite3_close(db_connection);
         return 1;
     }
 
-    // --- Command Dispatching ---
     std::string command = args[1];
 
-    // Check for specific commands first
-    if (command == "p" || command == "search" || command == "list" || command == "stats") {
-        // We will implement these later
+    if (command == "p") { // Programming note command
+        if (args.size() < 3) {
+            std::cerr << "Error: Programming note text cannot be empty." << std::endl;
+            show_usage();
+        } else {
+            std::string note_text;
+            std::vector<std::string> tags;
+            parse_note_input(args, 2, note_text, tags); // Parse from index 2
+
+            if (note_text.empty()) {
+                std::cerr << "Error: Note text cannot be empty." << std::endl;
+                show_usage();
+            } else {
+                ProgMetadata metadata = metadata::collect_metadata();
+                if (db::add_prog_note(db_connection, note_text, tags, metadata)) {
+                    std::cout << "\n🐌 Ink captured!" << std::endl;
+                } else {
+                    std::cerr << "Error: Failed to save your programming note." << std::endl;
+                }
+            }
+        }
+    } else if (command == "search" || command == "list" || command == "stats") {
         std::cout << "Command '" << command << "' is not yet implemented." << std::endl;
     } else {
-        // DEFAULT ACTION: If it's not a known command, treat it as a general note.
+        // Default action: General note
         std::string note_text;
         std::vector<std::string> tags;
-        
-        // The note starts from the first argument (index 1)
-        parse_note_input(args, 1, note_text, tags);
+        parse_note_input(args, 1, note_text, tags); // Parse from index 1
 
         if (note_text.empty()) {
             std::cerr << "Error: Note text cannot be empty." << std::endl;
             show_usage();
         } else {
-            if (db::add_note(db_connection, note_text, "general", tags)) {
+            if (db::add_general_note(db_connection, note_text, tags)) {
                 std::cout << "\n🐌 Ink captured!" << std::endl;
             } else {
                 std::cerr << "Error: Failed to save your note." << std::endl;
@@ -106,7 +118,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // --- Cleanup ---
     sqlite3_close(db_connection);
     return 0;
 }
