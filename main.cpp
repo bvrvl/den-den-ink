@@ -15,7 +15,7 @@ void show_usage() {
     std::cout << "A simple CLI note-taking tool." << std::endl;
     std::cout << "\nUsage:" << std::endl;
     std::cout << "  ink \"note text\" [#tags...]" << std::endl;
-    std::cout << "  ink p \"programming note\" [#tags...]" << std::endl;
+    std::cout << "  ink p \"coding note\" [#tags...]" << std::endl;
     std::cout << "  ink search \"query\" [#tags...]" << std::endl;
     std::cout << "  ink list [#tag]" << std::endl;
     std::cout << "  ink stats" << std::endl;
